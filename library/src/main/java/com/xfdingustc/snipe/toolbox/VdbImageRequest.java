@@ -48,10 +48,7 @@ public class VdbImageRequest extends VdbRequest<Bitmap> {
         return Priority.LOW;
     }
 
-    @Override
-    public boolean isIgnorable() {
-        return true;
-    }
+
 
     @Override
     protected VdbCommand createVdbCommand() {

@@ -2,6 +2,7 @@ package com.xfdingustc.snipe;
 
 import android.os.Process;
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.util.concurrent.BlockingQueue;
 

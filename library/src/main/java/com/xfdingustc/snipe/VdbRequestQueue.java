@@ -2,6 +2,7 @@ package com.xfdingustc.snipe;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -18,13 +19,16 @@ public class VdbRequestQueue {
 
     private static final int MAX_PENDING_REQUEST_COUNT = 4;
 
+
     //private final Set<VdbRequest<?>> mCurrentVdbRequests = new HashSet<VdbRequest<?>>();
     final ConcurrentHashMap<Integer, VdbRequest<?>> mCurrentVdbRequests = new ConcurrentHashMap<>();
 
     final ConcurrentHashMap<Integer, VdbMessageHandler<?>> mMessageHandlers = new ConcurrentHashMap<>();
 
     private final PriorityBlockingQueue<VdbRequest<?>> mVideoDatabaseQueue = new
-        PriorityBlockingQueue<VdbRequest<?>>();
+        PriorityBlockingQueue<>();
+
+    private final PriorityBlockingQueue<VdbRequest<?>> mWaitingQueue = new PriorityBlockingQueue<>();
 
     private final CircularQueue<VdbRequest<?>> mIgnorableRequestQueue = new CircularQueue<>(1);
 
@@ -45,8 +49,7 @@ public class VdbRequestQueue {
             new ExecutorDelivery(new Handler(Looper.getMainLooper())));
     }
 
-    public VdbRequestQueue(VdbSocket vdbSocket, int threadPoolSize, ResponseDelivery
-        delivery) {
+    public VdbRequestQueue(VdbSocket vdbSocket, int threadPoolSize, ResponseDelivery delivery) {
         mVdbSocket = vdbSocket;
         mVdbDispatchers = new VdbDispatcher[threadPoolSize];
         mVdbResponseDispatchers = new VdbResponseDispatcher[threadPoolSize];
@@ -108,12 +111,20 @@ public class VdbRequestQueue {
         vdbRequest.setRequestQueue(this);
         mCurrentVdbRequests.put(vdbRequest.getSequence(), vdbRequest);
         vdbRequest.addMarker("add-to-queue");
-        mVideoDatabaseQueue.add(vdbRequest);
+        if (mCurrentVdbRequests.size() >= MAX_PENDING_REQUEST_COUNT) {
+            mWaitingQueue.add(vdbRequest);
+        } else {
+            mVideoDatabaseQueue.add(vdbRequest);
+        }
         return vdbRequest;
     }
 
     <T> void finish(VdbRequest<T> vdbRequest) {
         mCurrentVdbRequests.remove(vdbRequest.getSequence());
+        if (mVideoDatabaseQueue.size() < MAX_PENDING_REQUEST_COUNT && mWaitingQueue.size() > 0) {
+            VdbRequest request = mWaitingQueue.poll();
+            mVideoDatabaseQueue.add(request);
+        } 
 
         if (vdbRequest.isIgnorable()) {
             int count = mPendingRequestCount.decrementAndGet();
