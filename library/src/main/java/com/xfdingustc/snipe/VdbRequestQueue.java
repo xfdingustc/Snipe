@@ -124,7 +124,7 @@ public class VdbRequestQueue {
         if (mVideoDatabaseQueue.size() < MAX_PENDING_REQUEST_COUNT && mWaitingQueue.size() > 0) {
             VdbRequest request = mWaitingQueue.poll();
             mVideoDatabaseQueue.add(request);
-        } 
+        }
 
         if (vdbRequest.isIgnorable()) {
             int count = mPendingRequestCount.decrementAndGet();
