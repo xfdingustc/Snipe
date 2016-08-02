@@ -21,6 +21,8 @@ public class ClipPos {
     private long mRealTimeMs; // real time returned by server
     private int mDuration; // returned by server
 
+    private boolean mIgnorable = false;
+
     public ClipPos(Clip clip) {
         this(clip, clip.getStartTimeMs(), ClipPos.TYPE_POSTER, false);
     }
@@ -85,13 +87,21 @@ public class ClipPos {
     }
 
     // set value returned by server
-    public final void setRealTimeMs(long realTimeMs) {
+    public void setRealTimeMs(long realTimeMs) {
         mRealTimeMs = realTimeMs;
     }
 
     // set value returned by server
-    public final void setDuration(int duration) {
+    public void setDuration(int duration) {
         mDuration = duration;
+    }
+
+    public boolean getIgnorable() {
+        return mIgnorable;
+    }
+
+    public void setIgnorable(boolean ignorable) {
+        mIgnorable = ignorable;
     }
 
 }
