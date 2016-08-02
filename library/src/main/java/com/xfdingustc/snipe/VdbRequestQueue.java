@@ -2,7 +2,6 @@ package com.xfdingustc.snipe;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -15,7 +14,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class VdbRequestQueue {
     private static final String TAG = VdbRequestQueue.class.getSimpleName();
 
-    private static final int DEFAULT_NETWORK_THREAD_POOL_SIZE = 1;
 
     private static final int MAX_PENDING_REQUEST_COUNT = 4;
 
@@ -37,22 +35,16 @@ public class VdbRequestQueue {
     private final VdbSocket mVdbSocket;
     private final ResponseDelivery mDelivery;
 
-    private VdbDispatcher[] mVdbDispatchers;
-    private VdbResponseDispatcher[] mVdbResponseDispatchers;
+    private VdbDispatcher mVdbDispatcher;
+    private VdbResponseDispatcher mVdbResponseDispatcher;
+
 
     public VdbRequestQueue(VdbSocket vdbSocket) {
-        this(vdbSocket, DEFAULT_NETWORK_THREAD_POOL_SIZE);
+        this(vdbSocket, new ExecutorDelivery(new Handler(Looper.getMainLooper())));
     }
 
-    public VdbRequestQueue(VdbSocket vdbSocket, int threadPoolSize) {
-        this(vdbSocket, threadPoolSize,
-            new ExecutorDelivery(new Handler(Looper.getMainLooper())));
-    }
-
-    public VdbRequestQueue(VdbSocket vdbSocket, int threadPoolSize, ResponseDelivery delivery) {
+    public VdbRequestQueue(VdbSocket vdbSocket, ResponseDelivery delivery) {
         mVdbSocket = vdbSocket;
-        mVdbDispatchers = new VdbDispatcher[threadPoolSize];
-        mVdbResponseDispatchers = new VdbResponseDispatcher[threadPoolSize];
         mDelivery = delivery;
     }
 
@@ -60,26 +52,17 @@ public class VdbRequestQueue {
     public void start() {
         stop();
 
-        for (int i = 0; i < mVdbDispatchers.length; i++) {
-            VdbDispatcher vdbDispatcher = new VdbDispatcher(mVideoDatabaseQueue, mVdbSocket, mDelivery);
-            mVdbDispatchers[i] = vdbDispatcher;
-            vdbDispatcher.start();
-            VdbResponseDispatcher responseDispatcher = new VdbResponseDispatcher(mCurrentVdbRequests, mMessageHandlers, mVdbSocket, mDelivery);
-            mVdbResponseDispatchers[i] = responseDispatcher;
-            responseDispatcher.start();
-        }
+        mVdbDispatcher = new VdbDispatcher(mVideoDatabaseQueue, mVdbSocket, mDelivery);
+        mVdbDispatcher.start();
+        mVdbResponseDispatcher = new VdbResponseDispatcher(mCurrentVdbRequests, mMessageHandlers, mVdbSocket, mDelivery);
+
+        mVdbResponseDispatcher.start();
     }
 
     public void stop() {
-
-        for (int i = 0; i < mVdbDispatchers.length; i++) {
-            if (mVdbDispatchers[i] != null) {
-                mVdbDispatchers[i].quit();
-            }
+        if (mVdbDispatcher != null) {
+            mVdbDispatcher.quit();
         }
-//        if (mVdbReceiver != null) {
-//            mVdbReceiver.quit();
-//        }
     }
 
     public <T> void registerMessageHandler(VdbMessageHandler<T> messageHandler) {
