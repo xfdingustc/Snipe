@@ -15,7 +15,7 @@ public class VdbRequestQueue {
     private static final String TAG = VdbRequestQueue.class.getSimpleName();
 
 
-    private static final int MAX_PENDING_REQUEST_COUNT = 4;
+    private static final int MAX_PENDING_REQUEST_COUNT = 2;
 
 
     //private final Set<VdbRequest<?>> mCurrentVdbRequests = new HashSet<VdbRequest<?>>();
