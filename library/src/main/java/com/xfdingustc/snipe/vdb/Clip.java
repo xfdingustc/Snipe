@@ -170,6 +170,8 @@ public class Clip implements Parcelable, Serializable {
 
     private int mDurationMs;
 
+    private String mVin;
+
 
     public long clipSize = -1;
 
@@ -250,6 +252,14 @@ public class Clip implements Parcelable, Serializable {
 
     public boolean contains(long timeMs) {
         return timeMs >= mStartTimeMs && timeMs < mStartTimeMs + mDurationMs;
+    }
+
+    public String getVin() {
+        return mVin;
+    }
+
+    public void setVin(String mVin) {
+        this.mVin = mVin;
     }
 
 

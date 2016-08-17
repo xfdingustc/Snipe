@@ -1,5 +1,7 @@
 package com.xfdingustc.snipe.toolbox;
 
+import android.os.Environment;
+
 import com.orhanobut.logger.Logger;
 import com.xfdingustc.snipe.VdbAcknowledge;
 import com.xfdingustc.snipe.VdbCommand;
@@ -7,6 +9,12 @@ import com.xfdingustc.snipe.VdbRequest;
 import com.xfdingustc.snipe.VdbResponse;
 import com.xfdingustc.snipe.vdb.Clip;
 import com.xfdingustc.snipe.vdb.ClipSet;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 
 /**
@@ -71,11 +79,11 @@ public class ClipSetExRequest extends VdbRequest<ClipSet> {
     }
 
     private VdbResponse<ClipSet> parseGetClipSetResponse(VdbAcknowledge response) {
+        //createFileWithByte(response.mReceiveBuffer);
         if (response.getRetCode() != 0) {
             Logger.t(TAG).e("ackGetClipSetInfo: failed");
             return null;
         }
-
         ClipSet clipSet = new ClipSet(response.readi32());
 
         int totalClips = response.readi32();
@@ -84,7 +92,6 @@ public class ClipSetExRequest extends VdbRequest<ClipSet> {
 
         Clip.ID liveClipId = new Clip.ID(Clip.TYPE_BUFFERED, response.readi32(), null);
         clipSet.setLiveClipId(liveClipId);
-
         for (int i = 0; i < totalClips; i++) {
             int clipId = response.readi32();
             int clipDate = response.readi32();
@@ -120,7 +127,7 @@ public class ClipSetExRequest extends VdbRequest<ClipSet> {
                 clip.realCid = new Clip.ID(Clip.TYPE_BUFFERED, realClipId, guid);
 
                 offsetSize += UUID_LENGTH + 3 * 4;
-//                response.skip(extraSize - offsetSize);
+//              response.skip(extraSize - offsetSize);
 
 
             }
@@ -133,15 +140,51 @@ public class ClipSetExRequest extends VdbRequest<ClipSet> {
                 response.skip(extraSize - offsetSize);
             }
 
+            if ((flag & FLAG_CLIP_DESC) > 0) {
+                do {
+                    int fcc = response.readi32();
+/*                  Logger.t(TAG).d((fcc >> 24) & 0xff);
+                    Logger.t(TAG).d((fcc >> 16) & 0xff);
+                    Logger.t(TAG).d((fcc >> 8) & 0xff);
+                    Logger.t(TAG).d(fcc & 0xff);*/
+                    offsetSize += 4;
+                    if (fcc == 0)
+                        break;
+                    int dataSize = response.readi32();
+                    int alignSize = 0;
+                    offsetSize += 4;
+                    //Logger.t(TAG).d(fcc + " + " + (('0' << 24) + ('N' << 16) + ('I' << 8) + 'V'));
+                    if (fcc == (('0' << 24) + ('N' << 16) + ('I' << 8) + 'V')) {
+                        //Logger.t(TAG).d("dataSize:" + dataSize);
+                        String vin = null;
+                        try {
+                            vin = new String(response.readByteArray(dataSize), "US-ASCII");
+                        } catch (UnsupportedEncodingException e) {
+                            Logger.t(TAG).d(e.getMessage());
+                        }
+                        clip.setVin(vin);
+                        Logger.t(TAG).d(vin);
+                        offsetSize += ((dataSize + 3) / 4) * 4;
+                        alignSize = ((dataSize + 3) /4 ) * 4;
+                        //Logger.t(TAG).d("offset size:" + offsetSize);
+                        response.skip(alignSize - dataSize);
+                    } else {
+                        response.skip(dataSize);
+                        alignSize = ((dataSize + 3) / 4) * 4;
+                        offsetSize += ((dataSize + 3) / 4) * 4;
+                        //Logger.t(TAG).d("offset size:" + offsetSize);
+                        response.skip(alignSize - dataSize);
+                    }
+                } while (true);
+            }
+
             if ((flag & FLAG_CLIP_ATTR) > 0) {
-//                Logger.t(TAG).d("flag : " + flag );
+                //Logger.t(TAG).d("flag : " + flag );
                 int attr = response.readi32();
                 offsetSize += 4;
                 if ((attr & mAttr) > 0) {
                     clipSet.addClip(clip);
                 }
-
-
 
             } else {
                 clipSet.addClip(clip);
@@ -150,6 +193,8 @@ public class ClipSetExRequest extends VdbRequest<ClipSet> {
         }
         return VdbResponse.success(clipSet);
     }
+
+    private String fileName = "response_byte.txt";
 
     private void readStreamInfo(Clip clip, int index, VdbAcknowledge response) {
         Clip.StreamInfo info = clip.streams[index];
@@ -161,6 +206,41 @@ public class ClipSetExRequest extends VdbRequest<ClipSet> {
         info.audio_coding = response.readi8();
         info.audio_num_channels = response.readi8();
         info.audio_sampling_freq = response.readi32();
+    }
+
+    private void createFileWithByte(byte[] bytes) {
+        File file = new File(Environment.getExternalStorageDirectory(),
+                fileName);
+        FileOutputStream outputStream = null;
+        BufferedOutputStream bufferedOutputStream = null;
+        try {
+
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            outputStream = new FileOutputStream(file);
+            bufferedOutputStream = new BufferedOutputStream(outputStream);
+            bufferedOutputStream.write(bytes);
+            bufferedOutputStream.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (bufferedOutputStream != null) {
+                try {
+                    bufferedOutputStream.close();
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                }
+            }
+        }
     }
 
 
