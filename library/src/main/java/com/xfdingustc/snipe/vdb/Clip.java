@@ -7,6 +7,7 @@ import com.xfdingustc.snipe.utils.DateTime;
 import com.xfdingustc.snipe.utils.ToStringUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.TimeZone;
 
 public class Clip implements Parcelable, Serializable {
@@ -14,6 +15,13 @@ public class Clip implements Parcelable, Serializable {
     public static final int TYPE_BUFFERED = 0;
     public static final int TYPE_MARKED = 1;
 
+    public static final int TYPE_RACE = (1 << 7);
+    public static final int MASK_RACE = 0x7f;
+
+    public static final int TYPE_RACE_CD6T = 0;
+    public static final int TYPE_RACE_CD3T = 1;
+    public static final int TYPE_RACE_AU6T = 2;
+    public static final int TYPE_RACE_AU3T = 4;
 
     public static final int TYPE_TEMP = 0x108;
 
@@ -172,8 +180,11 @@ public class Clip implements Parcelable, Serializable {
 
     private String mVin;
 
-
     public long clipSize = -1;
+
+    public int typeRace = 0;
+
+    public ArrayList<Long> raceTimingPoints = null;
 
 
     public boolean bDeleting;

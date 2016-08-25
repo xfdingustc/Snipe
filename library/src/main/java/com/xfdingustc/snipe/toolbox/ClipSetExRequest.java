@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 
 /**
@@ -26,6 +27,8 @@ public class ClipSetExRequest extends VdbRequest<ClipSet> {
     public static final int FLAG_CLIP_VDB_ID = 1 << 1;
     public static final int FLAG_CLIP_DESC = 1 << 2;
     public static final int FLAG_CLIP_ATTR = 1 << 3;
+    public static final int FLAG_CLIP_SIZE = 1 << 4;
+    public static final int FLAG_CLIP_SCENE_DATA = 1 << 5;
     public static final int METHOD_GET = 0;
     public static final int METHOD_SET = 1;
     private final static String TAG = ClipSetExRequest.class.getSimpleName();
@@ -101,7 +104,7 @@ public class ClipSetExRequest extends VdbRequest<ClipSet> {
 
             int numStreams = response.readi16();
             int flag = response.readi16();
-            //Log.e("test", "Flag: " + flag);
+            Logger.t(TAG).d("Flag: " + flag);
 
             if (numStreams > 0) {
                 readStreamInfo(clip, 0, response);
@@ -177,18 +180,93 @@ public class ClipSetExRequest extends VdbRequest<ClipSet> {
                     }
                 } while (true);
             }
-
+            boolean attrMatch = true;
             if ((flag & FLAG_CLIP_ATTR) > 0) {
                 //Logger.t(TAG).d("flag : " + flag );
                 int attr = response.readi32();
                 offsetSize += 4;
-                if ((attr & mAttr) > 0) {
-                    clipSet.addClip(clip);
+                if ((attr & mAttr) <= 0) {
+                    attrMatch = false;
                 }
+            }
 
-            } else {
+            if ((flag & FLAG_CLIP_SCENE_DATA) > 0) {
+                int dataSize = response.readi32();
+                offsetSize += dataSize + 4;
+                int fcc = response.readi32();
+                if (fcc == (('C' << 24) + ('D' << 16) + ('6' << 8) + 'T')) {
+                    clip.typeRace |= Clip.TYPE_RACE;
+                    clip.typeRace |= Clip.TYPE_RACE_CD6T;
+                    clip.raceTimingPoints = new ArrayList<>(6);
+                    int t1MsLo = response.readi32();
+                    int t1MsHi = response.readi32();
+                    int t2MsOffset = response.readi32();
+                    int t3MsOffset = response.readi32();
+                    int t4MsOffset = response.readi32();
+                    int t5MsOffset = response.readi32();
+                    int t6MsOffset = response.readi32();
+                    clip.raceTimingPoints.add(0, (long) t1MsHi << 32 + t1MsLo);
+                    clip.raceTimingPoints.add(1, (long) t2MsOffset);
+                    clip.raceTimingPoints.add(2, (long) t3MsOffset);
+                    clip.raceTimingPoints.add(3, (long) t4MsOffset);
+                    clip.raceTimingPoints.add(4, (long) t5MsOffset);
+                    clip.raceTimingPoints.add(5, (long) t6MsOffset);
+                } else if (fcc == (('C' << 24) + ('D' << 16) + ('3' << 8) + 'T')){
+                    clip.typeRace |= Clip.TYPE_RACE;
+                    clip.typeRace |= Clip.TYPE_RACE_CD3T;
+                    clip.raceTimingPoints = new ArrayList<>(6);
+                    int t1MsLo = response.readi32();
+                    int t1MsHi = response.readi32();
+                    int t2MsOffset = response.readi32();
+                    int t3MsOffset = response.readi32();
+                    int t4MsOffset = response.readi32();
+                    clip.raceTimingPoints.add(0, (long) t1MsHi << 32 + t1MsLo);
+                    clip.raceTimingPoints.add(1, (long) t2MsOffset);
+                    clip.raceTimingPoints.add(2, (long) t3MsOffset);
+                    clip.raceTimingPoints.add(3, (long) t4MsOffset);
+                    clip.raceTimingPoints.add(4, (long) -1);
+                    clip.raceTimingPoints.add(5, (long) -1);
+                } else if (fcc == (('A' << 24) + ('U' << 16) + ('6' << 8) + 'T')) {
+                    clip.typeRace |= Clip.TYPE_RACE;
+                    clip.typeRace |= Clip.TYPE_RACE_AU6T;
+                    clip.raceTimingPoints = new ArrayList<>(6);
+                    int t1MsLo = response.readi32();
+                    int t1MsHi = response.readi32();
+                    int t2MsOffset = -1;
+                    int t3MsOffset = response.readi32();
+                    int t4MsOffset = response.readi32();
+                    int t5MsOffset = response.readi32();
+                    int t6MsOffset = response.readi32();
+                    clip.raceTimingPoints.add(0, (long) t1MsHi << 32 + t1MsLo);
+                    clip.raceTimingPoints.add(1, (long) t2MsOffset);
+                    clip.raceTimingPoints.add(2, (long) t3MsOffset);
+                    clip.raceTimingPoints.add(3, (long) t4MsOffset);
+                    clip.raceTimingPoints.add(4, (long) t5MsOffset);
+                    clip.raceTimingPoints.add(5, (long) t6MsOffset);
+                } else if (fcc == (('A' << 24) + ('U' << 16) + ('3' << 8) + 'T')) {
+                    clip.typeRace |= Clip.TYPE_RACE;
+                    clip.typeRace |= Clip.TYPE_RACE_AU3T;
+                    clip.raceTimingPoints = new ArrayList<>(6);
+                    int t1MsLo = response.readi32();
+                    int t1MsHi = response.readi32();
+                    int t2MsOffset = -1;
+                    int t3MsOffset = response.readi32();
+                    int t4MsOffset = response.readi32();
+                    int t5MsOffset = -1;
+                    int t6MsOffset = -1;
+                    clip.raceTimingPoints.add(0, (long) t1MsHi << 32 + t1MsLo);
+                    clip.raceTimingPoints.add(1, (long) t2MsOffset);
+                    clip.raceTimingPoints.add(2, (long) t3MsOffset);
+                    clip.raceTimingPoints.add(3, (long) t4MsOffset);
+                    clip.raceTimingPoints.add(4, (long) t5MsOffset);
+                    clip.raceTimingPoints.add(5, (long) t6MsOffset);
+                }
+            }
+
+            if (attrMatch) {
                 clipSet.addClip(clip);
             }
+
             response.skip(extraSize - offsetSize);
         }
         return VdbResponse.success(clipSet);

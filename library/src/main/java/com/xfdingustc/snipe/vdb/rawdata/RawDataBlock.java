@@ -67,7 +67,7 @@ public class RawDataBlock {
     public RawDataItem getRawDataItemByTime(long timeMs) {
         for (int i = mItemIndex; i < mRawDataItems.size(); i++) {
             RawDataItem item = mRawDataItems.get(i);
-            if (item.getPtsMs() < timeMs) {
+            if (item.getPtsMs() <= timeMs) {
                 mItemIndex++;
                 return item;
             }
