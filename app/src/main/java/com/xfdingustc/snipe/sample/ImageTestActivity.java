@@ -8,6 +8,7 @@ import android.widget.TextView;
 import com.xfdingustc.snipe.SnipeError;
 import com.xfdingustc.snipe.VdbRequestFuture;
 import com.xfdingustc.snipe.VdbResponse;
+import com.xfdingustc.snipe.control.VdtCameraManager;
 import com.xfdingustc.snipe.toolbox.ClipSetExRequest;
 import com.xfdingustc.snipe.toolbox.VdbImageRequest;
 import com.xfdingustc.snipe.vdb.Clip;
@@ -34,7 +35,7 @@ public class ImageTestActivity extends BaseActivity {
 
     @OnClick(R.id.btn_start)
     public void onBtnStartClicked() {
-        mVdbRequestQueue = Vdb.getVdbRequestQueue();
+        mVdbRequestQueue = VdtCameraManager.getManager().getCurrentVdbRequestQueue();
         fetchBookmark();
     }
 
