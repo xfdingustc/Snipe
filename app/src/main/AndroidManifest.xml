@@ -19,6 +19,10 @@
         </activity>
 
         <activity android:name=".ImageTestActivity"/>
+
+        <activity android:name=".CameraConnectionTestActivity"/>
+
+        <activity android:name=".RawDataItemTestActivity"/>
     </application>
 
 </manifest>

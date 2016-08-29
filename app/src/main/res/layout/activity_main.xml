@@ -11,6 +11,13 @@
     android:orientation="vertical"
     tools:context="com.xfdingustc.snipe.sample.MainActivity">
 
+
+    <Button
+        android:id="@+id/btn_camera_connect_test"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Camera Connect Test"/>
+
     <Button
         android:id="@+id/btn_image_test"
         android:layout_width="match_parent"

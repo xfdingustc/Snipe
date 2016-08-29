@@ -18,6 +18,12 @@ import butterknife.OnClick;
 
 public class MainActivity extends BaseActivity {
 
+    @OnClick(R.id.btn_camera_connect_test)
+    public void onBtnCameraConnectTestClicked() {
+        Intent intent = new Intent(this, CameraConnectionTestActivity.class);
+        startActivity(intent);
+    }
+
     @OnClick(R.id.btn_image_test)
     public void onBtnImageTestClicked() {
         Intent intent = new Intent(this, ImageTestActivity.class);

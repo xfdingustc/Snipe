@@ -26,7 +26,7 @@ import java.net.InetSocketAddress;
 /**
  * Created by Xiaofei on 2016/6/1.
  */
-public class VdtCameraCommunicationBus implements VdtCameraCmdConsts {
+class VdtCameraCommunicationBus implements VdtCameraCmdConsts {
     private static final String TAG = VdtCameraCommunicationBus.class.getSimpleName();
     private final InetSocketAddress mAddress;
     private final ConnectionChangeListener mConnectionListener;

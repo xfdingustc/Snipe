@@ -3,7 +3,6 @@ package com.xfdingustc.snipe.control;
 
 import android.util.Log;
 
-
 import com.xfdingustc.snipe.BasicVdbSocket;
 import com.xfdingustc.snipe.SnipeError;
 import com.xfdingustc.snipe.VdbCommand;
@@ -17,7 +16,6 @@ import com.xfdingustc.snipe.control.events.CameraStateChangeEvent;
 import com.xfdingustc.snipe.control.events.MarkLiveMsgEvent;
 import com.xfdingustc.snipe.control.events.MicStateChangeEvent;
 import com.xfdingustc.snipe.control.events.NetworkEvent;
-import com.xfdingustc.snipe.control.events.RawDataItemEvent;
 import com.xfdingustc.snipe.toolbox.ClipInfoMsgHandler;
 import com.xfdingustc.snipe.toolbox.MarkLiveMsgHandler;
 import com.xfdingustc.snipe.toolbox.RawDataMsgHandler;
@@ -223,6 +221,8 @@ public class VdtCamera implements VdtCameraCmdConsts {
     private VdtCameraCommunicationBus mCommunicationBus;
 
 
+    private WeakReference<OnRawDataUpdateListener> mOnRawDataUpdateListener;
+
     public static class ServiceInfo {
         public String ssid;
         public final InetAddress inetAddr;
@@ -297,6 +297,11 @@ public class VdtCamera implements VdtCameraCmdConsts {
 
         mCommunicationBus.start();
 
+    }
+
+
+    public void setOnRawDataItemUpdateListener(OnRawDataUpdateListener listener) {
+        mOnRawDataUpdateListener = new WeakReference<>(listener);
     }
 
     public void setCameraName(String name) {
@@ -657,7 +662,13 @@ public class VdtCamera implements VdtCameraCmdConsts {
             @Override
             public void onResponse(List<RawDataItem> response) {
 //                Logger.t(TAG).d("receive raw data item");
-                mEventBus.post(new RawDataItemEvent(VdtCamera.this, response));
+//                mEventBus.post(new RawDataItemEvent(VdtCamera.this, response));
+                if (mOnRawDataUpdateListener != null) {
+                    OnRawDataUpdateListener listener = mOnRawDataUpdateListener.get();
+                    if (listener != null) {
+                        listener.OnRawDataUpdate(VdtCamera.this, response);
+                    }
+                }
             }
 
         }, new VdbResponse.ErrorListener() {
@@ -987,11 +998,6 @@ public class VdtCamera implements VdtCameraCmdConsts {
         storageInfo.totalSpace = (int) (getStorageTotalSpace() / 1024);
         storageInfo.freeSpace = (int) (getStorageFreeSpace() / 1024);
         return storageInfo;
-    }
-
-
-    public interface OnScanHostListener {
-        void OnScanHostResult(List<NetworkItemBean> networkList);
     }
 
 
@@ -1630,5 +1636,14 @@ public class VdtCamera implements VdtCameraCmdConsts {
             }
         }
 
+    }
+
+
+    public interface OnRawDataUpdateListener {
+        void OnRawDataUpdate(VdtCamera camera, List<RawDataItem> item);
+    }
+
+    public interface OnScanHostListener {
+        void OnScanHostResult(List<NetworkItemBean> networkList);
     }
 }
