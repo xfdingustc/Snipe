@@ -35,13 +35,34 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'libs'
+    }
+    maven {
+        url "https://dl.bintray.com/xfdingustc/maven"
+    }
+
+    maven {
+        url "http://maven.bughd.com/public"
+    }
+    maven {
+        url "http://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven {
+        url "https://jitpack.io"
+    }
+}
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.1.1'
     compile 'com.orhanobut:logger:1.15'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'javax.jmdns:jmdns:3.4.1'
+    compile 'com.xfdingustc:rxutils:0.1'
 }
 
 

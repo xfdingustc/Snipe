@@ -8,6 +8,7 @@ import com.orhanobut.logger.Logger;
 import com.xfdingustc.snipe.SnipeError;
 import com.xfdingustc.snipe.VdbResponse;
 import com.xfdingustc.snipe.control.VdtCameraManager;
+import com.xfdingustc.snipe.sample.cameracontrol.CameraControlTestActivity;
 import com.xfdingustc.snipe.toolbox.ClipSetExRequest;
 import com.xfdingustc.snipe.vdb.Clip;
 import com.xfdingustc.snipe.vdb.ClipSet;
@@ -20,7 +21,7 @@ public class MainActivity extends BaseActivity {
 
     @OnClick(R.id.btn_camera_connect_test)
     public void onBtnCameraConnectTestClicked() {
-        Intent intent = new Intent(this, CameraConnectionTestActivity.class);
+        Intent intent = new Intent(this, CameraControlTestActivity.class);
         startActivity(intent);
     }
 

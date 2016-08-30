@@ -1,19 +1,28 @@
-package com.xfdingustc.snipe.sample;
+package com.xfdingustc.snipe.sample.cameracontrol;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+
+import com.xfdingustc.snipe.sample.BaseActivity;
+import com.xfdingustc.snipe.sample.R;
 
 import butterknife.OnClick;
 
 /**
  * Created by Xiaofei on 2016/8/29.
  */
-public class CameraConnectionTestActivity extends BaseActivity {
+public class CameraControlTestActivity extends BaseActivity {
 
     @OnClick(R.id.btn_raw_data)
     public void onBtnRawDataItemClicked() {
         Intent intent = new Intent(this, RawDataItemTestActivity.class);
+        startActivity(intent);
+    }
+
+    @OnClick(R.id.btn_bt)
+    public void onBtnBluetoothClicked() {
+        Intent intent = new Intent(this, BluetoothTestActivity.class);
         startActivity(intent);
     }
 
@@ -23,7 +32,9 @@ public class CameraConnectionTestActivity extends BaseActivity {
         init();
     }
 
-    private void init() {
+    @Override
+    protected void init() {
+        super.init();
         initViews();
     }
 

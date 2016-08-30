@@ -1,4 +1,4 @@
-package com.xfdingustc.snipe.sample;
+package com.xfdingustc.snipe.sample.cameracontrol;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,6 +10,8 @@ import com.xfdingustc.snipe.SnipeError;
 import com.xfdingustc.snipe.VdbResponse;
 import com.xfdingustc.snipe.control.VdtCamera;
 import com.xfdingustc.snipe.control.VdtCameraManager;
+import com.xfdingustc.snipe.sample.BaseActivity;
+import com.xfdingustc.snipe.sample.R;
 import com.xfdingustc.snipe.toolbox.LiveRawDataRequest;
 import com.xfdingustc.snipe.vdb.rawdata.RawDataBlock;
 import com.xfdingustc.snipe.vdb.rawdata.RawDataItem;
@@ -24,7 +26,6 @@ import butterknife.OnClick;
  */
 public class RawDataItemTestActivity extends BaseActivity {
 
-    private VdtCamera mVdtCamrea;
 
     @BindView(R.id.raw_data_item)
     TextView mRawDataItemUpdate;
@@ -75,15 +76,17 @@ public class RawDataItemTestActivity extends BaseActivity {
         init();
     }
 
-    private void init() {
+    @Override
+    protected void init() {
+        super.init();
         initViews();
     }
 
     private void initViews() {
         setContentView(R.layout.activity_raw_data_item);
-        mVdtCamrea = VdtCameraManager.getManager().getCurrentCamera();
+
         mVdbRequestQueue = VdtCameraManager.getManager().getCurrentVdbRequestQueue();
-        mVdtCamrea.setOnRawDataItemUpdateListener(new VdtCamera.OnRawDataUpdateListener() {
+        mVdtCamera.setOnRawDataItemUpdateListener(new VdtCamera.OnRawDataUpdateListener() {
             @Override
             public void OnRawDataUpdate(VdtCamera camera, List<RawDataItem> item) {
                 mRawDataItemUpdate.append("Raw data item availabe: " + item.size() + " \n");

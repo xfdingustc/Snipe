@@ -7,7 +7,6 @@ public class BluetoothEvent {
     public static final int BT_SCAN_COMPLETE = 0;
     public static final int BT_DEVICE_BIND_FINISHED = 1;
     public static final int BT_DEVICE_UNBIND_FINISHED = 2;
-    public static final int BT_DEVICE_STATUS_CHANGED = 4;
 
     private final Object mExtra;
     private final int mWhat;

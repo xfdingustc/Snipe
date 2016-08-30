@@ -3,6 +3,8 @@ package com.xfdingustc.snipe.control;
 
 import android.util.Log;
 
+import com.orhanobut.logger.Logger;
+import com.xfdingustc.rxutils.library.RxBus;
 import com.xfdingustc.snipe.BasicVdbSocket;
 import com.xfdingustc.snipe.SnipeError;
 import com.xfdingustc.snipe.VdbCommand;
@@ -218,6 +220,8 @@ public class VdtCamera implements VdtCameraCmdConsts {
 
     private EventBus mEventBus = EventBus.getDefault();
 
+    private RxBus mRxBus = RxBus.getDefault();
+
     private VdtCameraCommunicationBus mCommunicationBus;
 
 
@@ -312,7 +316,9 @@ public class VdtCamera implements VdtCameraCmdConsts {
         if (!mCameraName.equals(name)) {
             Log.d(TAG, "setCameraName: " + name);
             mCameraName = name;
-            mEventBus.post(new CameraStateChangeEvent(CameraStateChangeEvent.CAMERA_STATE_INFO, this, null));
+
+            mRxBus.post(new CameraStateChangeEvent(CameraStateChangeEvent.CAMERA_STATE_INFO, this));
+
         }
     }
 
@@ -716,7 +722,6 @@ public class VdtCamera implements VdtCameraCmdConsts {
                 public void onResponse(Object response) {
                     mEventBus.post(new VdbReadyInfo(true));
                     Log.d(TAG, "handling vdbReadyMsg");
-
                 }
             },
             new VdbResponse.ErrorListener() {
@@ -1031,7 +1036,7 @@ public class VdtCamera implements VdtCameraCmdConsts {
         int state = Integer.parseInt(p1);
         boolean is_still = p2.length() > 0 ? Integer.parseInt(p2) != 0 : false;
         if (mRecordState != state) {
-            mEventBus.post(new CameraStateChangeEvent(CameraStateChangeEvent.CAMERA_STATE_REC, VdtCamera.this, null));
+            mRxBus.post(new CameraStateChangeEvent(CameraStateChangeEvent.CAMERA_STATE_REC, VdtCamera.this, null));
             mRecordState = state;
         }
     }
@@ -1041,7 +1046,7 @@ public class VdtCamera implements VdtCameraCmdConsts {
         int duration = Integer.parseInt(p1);
 
         if (mRecordTime != duration) {
-            mEventBus.post(new CameraStateChangeEvent(CameraStateChangeEvent.CAMERA_STATE_REC_DURATION, VdtCamera.this, duration));
+            mRxBus.post(new CameraStateChangeEvent(CameraStateChangeEvent.CAMERA_STATE_REC_DURATION, VdtCamera.this, duration));
             mRecordTime = duration;
         }
 
@@ -1121,10 +1126,6 @@ public class VdtCamera implements VdtCameraCmdConsts {
 
 
     private void ack_Network_GetHostInfor(String p1, String p2) {
-        // TODO:
-//            if (mListener != null) {
-//                mListener.onHostSSIDFetched(p1);
-//            }
     }
 
     private void ack_Rec_error(String p1, String p2) {
@@ -1152,7 +1153,8 @@ public class VdtCamera implements VdtCameraCmdConsts {
 
     private void ack_CAM_BT_getDEVStatus(String p1, String p2) {
         int i_p1 = Integer.parseInt(p1);
-        int devType = (i_p1 >> 8) & 0xff;
+        Log.d(TAG, "i_p1: " + p1);
+        int devType = i_p1 >> 8;
         int devState = i_p1 & 0xff;
         String mac = "";
         String name = "";
@@ -1169,13 +1171,13 @@ public class VdtCamera implements VdtCameraCmdConsts {
             name = "";
         }
 
-//        Logger.t(TAG).d("bt devide type: " + devType + " dev_state " + devState + " mac: " + mac + " name " + name);
+        Logger.t(TAG).d("bt devide type: " + devType + " dev_state " + devState + " mac: " + mac + " name " + name);
         if (BtDevice.BT_DEVICE_TYPE_OBD == devType) {
             mObdDevice.setDevState(devState, mac, name);
         } else if (BtDevice.BT_DEVICE_TYPE_REMOTE_CTR == devType) {
             mRemoteCtrlDevice.setDevState(devState, mac, name);
         }
-        mEventBus.post(new BluetoothEvent(BluetoothEvent.BT_DEVICE_STATUS_CHANGED, null));
+        mRxBus.post(new CameraStateChangeEvent(CameraStateChangeEvent.CAMERA_STATE_BT_DEVICE_STATUS_CHANGED, this));
 
     }
 

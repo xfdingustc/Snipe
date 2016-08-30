@@ -20,9 +20,11 @@
 
         <activity android:name=".ImageTestActivity"/>
 
-        <activity android:name=".CameraConnectionTestActivity"/>
+        <activity android:name=".cameracontrol.CameraControlTestActivity"/>
 
-        <activity android:name=".RawDataItemTestActivity"/>
+        <activity android:name=".cameracontrol.RawDataItemTestActivity"/>
+
+        <activity android:name=".cameracontrol.BluetoothTestActivity"/>
     </application>
 
 </manifest>

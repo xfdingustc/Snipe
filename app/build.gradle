@@ -36,6 +36,26 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'libs'
+    }
+    maven {
+        url "https://dl.bintray.com/xfdingustc/maven"
+    }
+
+    maven {
+        url "http://maven.bughd.com/public"
+    }
+    maven {
+        url "http://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven {
+        url "https://jitpack.io"
+    }
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
@@ -43,7 +63,5 @@ dependencies {
     compile 'com.orhanobut:logger:1.15'
     compile 'com.jakewharton:butterknife:8.1.0'
     apt 'com.jakewharton:butterknife-compiler:8.1.0'
-    compile 'io.reactivex:rxjava:1.1.7'
-    compile 'io.reactivex:rxandroid:1.2.1'
     compile project(':library')
 }
