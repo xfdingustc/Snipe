@@ -25,6 +25,8 @@
         <activity android:name=".cameracontrol.RawDataItemTestActivity"/>
 
         <activity android:name=".cameracontrol.BluetoothTestActivity"/>
+
+        <activity android:name=".cameracontrol.AudioTestActivity"/>
     </application>
 
 </manifest>

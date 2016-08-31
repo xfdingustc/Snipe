@@ -26,6 +26,12 @@ public class CameraControlTestActivity extends BaseActivity {
         startActivity(intent);
     }
 
+    @OnClick(R.id.btn_audio)
+    public void onBtnAudioClicked() {
+        Intent intent = new Intent(this, AudioTestActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

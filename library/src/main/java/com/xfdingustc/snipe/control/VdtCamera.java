@@ -16,7 +16,6 @@ import com.xfdingustc.snipe.control.entities.NetworkItemBean;
 import com.xfdingustc.snipe.control.events.BluetoothEvent;
 import com.xfdingustc.snipe.control.events.CameraStateChangeEvent;
 import com.xfdingustc.snipe.control.events.MarkLiveMsgEvent;
-import com.xfdingustc.snipe.control.events.MicStateChangeEvent;
 import com.xfdingustc.snipe.control.events.NetworkEvent;
 import com.xfdingustc.snipe.toolbox.ClipInfoMsgHandler;
 import com.xfdingustc.snipe.toolbox.MarkLiveMsgHandler;
@@ -411,12 +410,10 @@ public class VdtCamera implements VdtCameraCmdConsts {
     }
 
 
-    public boolean isMicOn() {
-        return mMicState == STATE_MIC_ON;
-    }
 
-    public void setMicOn(boolean on) {
-        int micState = on ? STATE_MIC_ON : STATE_MIC_OFF;
+
+    public void setMicEnabled(boolean enabled) {
+        int micState = enabled ? STATE_MIC_ON : STATE_MIC_OFF;
         int gain = 5;
         if (micState == STATE_MIC_ON) {
             gain = 5;
@@ -989,6 +986,8 @@ public class VdtCamera implements VdtCameraCmdConsts {
 
     }
 
+
+
     public boolean isMicEnabled() {
         return mMicState == STATE_MIC_ON;
     }
@@ -1106,7 +1105,7 @@ public class VdtCamera implements VdtCameraCmdConsts {
         int vol = Integer.parseInt(p2);
         mMicState = state;
         mMicVol = vol;
-        mEventBus.post(new MicStateChangeEvent(mMicState, mMicVol));
+        mRxBus.post(new CameraStateChangeEvent(CameraStateChangeEvent.CAMEAR_STATE_MICROPHONE_STATUS_CHANGED, this));
     }
 
 
@@ -1245,7 +1244,7 @@ public class VdtCamera implements VdtCameraCmdConsts {
         if (type == BtDevice.BT_DEVICE_TYPE_REMOTE_CTR || type == BtDevice.BT_DEVICE_TYPE_OBD) {
             mCommunicationBus.sendCommand(CMD_CAM_BT_GET_DEV_STATUS, type);
         }
-
+        Log.d(TAG, "ack_CAM_BT_doUnBind" + "type:" + type);
         mEventBus.post(new BluetoothEvent(BluetoothEvent.BT_DEVICE_UNBIND_FINISHED));
     }
 

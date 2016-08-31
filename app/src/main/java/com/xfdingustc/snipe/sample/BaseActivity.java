@@ -3,6 +3,7 @@ package com.xfdingustc.snipe.sample;
 import android.support.annotation.LayoutRes;
 import android.support.v7.app.AppCompatActivity;
 
+import com.xfdingustc.rxutils.library.RxBus;
 import com.xfdingustc.snipe.VdbRequestQueue;
 import com.xfdingustc.snipe.control.VdtCamera;
 import com.xfdingustc.snipe.control.VdtCameraManager;
@@ -18,6 +19,8 @@ public class BaseActivity extends AppCompatActivity {
     protected VdbRequestQueue mVdbRequestQueue;
 
     protected String TAG;
+
+    protected RxBus mRxBus = RxBus.getDefault();
 
     protected void init() {
         mVdtCamera = VdtCameraManager.getManager().getCurrentCamera();
